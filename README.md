@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./assets/logo.png" width="300" />
+<img src="https://raw.githubusercontent.com/smolijar/mlok/master/assets/logo.png" width="300" />
 
 # Mlok
 

@@ -1,13 +1,16 @@
 {
   "name": "mlok",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
     "test": "mocha"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Jaroslav Šmolík <smolijar@gmail.com>",
+  "license": "MIT",
+  "files": ["dist"],
   "devDependencies": {
     "@types/mocha": "^10.0.1",
     "jest": "^29.5.0",
