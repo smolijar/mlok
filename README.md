@@ -5,11 +5,13 @@
 
 </div>
 
-
 ## TODO
- - [ ] npm + GitHub metadata, keywords etc
- - [ ] Examples and DX comparison
- - [ ] override vs strict override API
- - [ ] collision API
- - [ ] README
-  
+
+- [ ] npm + GitHub metadata, keywords etc
+- [ ] Examples and DX comparison
+- [ ] function/scalar override
+- [ ] override vs strict override API
+- [ ] collision API
+- [ ] README
+- [ ] Sinon API / comparison
+- [ ] Jest battery test
