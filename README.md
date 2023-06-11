@@ -5,4 +5,11 @@
 
 </div>
 
-TBD
+
+## TODO
+ - [ ] npm + GitHub metadata, keywords etc
+ - [ ] Examples and DX comparison
+ - [ ] override vs strict override API
+ - [ ] collision API
+ - [ ] README
+  

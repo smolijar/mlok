@@ -9,14 +9,14 @@ class JestCalls<T extends any[] = any[]> extends Array<T> {
 
 export const isMlok: unique symbol = Symbol('isMlok')
 
-export const mlok = <T>() => mlokInternal<T>({})
-export const mlokInternal = <T>(overrides: Record<any, any>) => {
+export const mlok = <T>() => mlokNode<T>({})
+export const mlokNode = <T>(overrides: Record<any, any>) => {
   let children: Record<string | symbol, any> = {}
   const calls = new JestCalls()
   const fn = (...args: any[]) => {
     const token = JSON.stringify(args)
     calls.push(args)
-    children[token] ||= mlokInternal(overrides)
+    children[token] ||= mlokNode(overrides)
     return children[token]
   }
   Object.defineProperty(fn, 'name', {
@@ -31,7 +31,7 @@ export const mlokInternal = <T>(overrides: Record<any, any>) => {
       calls.length = 0
     },
     override: (overridesMap: Record<any, any>) => {
-      Object.assign(overrides, overridesMap)
+      return mlokNode(overridesMap)
     },
     [isMlok]: true,
     // Jest
@@ -44,23 +44,33 @@ export const mlokInternal = <T>(overrides: Record<any, any>) => {
         // @ts-expect-error
         return passThrough[prop] ?? overrides[prop]
       }
-      children[prop] ||= mlokInternal(overrides)
+      children[prop] ||= mlokNode(overrides)
       return children[prop]
     },
   })
-  return proxy as Mlok<T>
+  return proxy as MlokRoot<T>
 }
 
-type E = {
+type MlokLeafExtension = {
   [isMlok]: true
   reset: () => void
-  override: (overridesMap: Record<any, any>) => void
 }
-type Mlok<T, K extends keyof T = keyof T> = E &
-  (T extends (...args: infer A) => infer R
-    ? (...args: A) => Mlok<Exclude<R, undefined>>
-    : T extends Record<any, any>
-    ? {
-        [k in K]: Mlok<T[k]>
+type Mlok<
+  MlokedInterface,
+  Overrides extends Record<any, any> = {},
+  _MlokedInterfaceKeys extends keyof MlokedInterface = keyof MlokedInterface,
+  ResultType = MlokedInterface extends (...args: infer A) => infer R
+    ? (...args: A) => Mlok<Exclude<R, undefined>, Overrides>
+    : {
+        [k in _MlokedInterfaceKeys]: Mlok<MlokedInterface[k], Overrides>
       }
-    : T)
+> = Overrides & MlokLeafExtension & ResultType
+
+type MlokRoot<
+  MlokedInterface,
+  ResultType = Mlok<MlokedInterface>
+> = ResultType & {
+  override: <O extends Record<any, any>>(
+    overridesMap: O
+  ) => Mlok<MlokedInterface, O>
+}
