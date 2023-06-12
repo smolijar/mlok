@@ -1,6 +1,5 @@
 import { isMlok, mlok } from './index.js'
 import { ClientRequest } from 'node:http'
-import { jestExpect } from '@jest/expect'
 import assert = require('assert')
 
 describe('Mlok', () => {
@@ -18,51 +17,32 @@ describe('Mlok', () => {
     const reqMock = mlok<ClientRequest>().override({ authorization: 'foo' })
     assert(reqMock.getHeaders().authorization === 'foo')
   })
+  it('Override (simple object, type override)', () => {
+    const reqMock = mlok<ClientRequest>().override({
+      authorization: 'foo',
+    } as const)
+    assert(reqMock.getHeaders().authorization === 'foo')
+    const foo: 'foo' = reqMock.getHeaders().authorization
+    assert(foo === 'foo')
+  })
 })
 
-describe('Jest compatibility', () => {
-  const types = {
-    function: mlok<(n: number) => {}>(),
-    method: mlok<number[]>().includes,
-  }
-  for (const [label, fn] of Object.entries(types)) {
-    const ITERATIONS = Array(10).keys()
-    beforeEach(() => fn.reset())
-    describe(label, () => {
-      it('toHaveBeenCalled', () => {
-        jestExpect(fn).not.toHaveBeenCalled()
-        fn(1)
-        jestExpect(fn).toHaveBeenCalled()
-      })
-      it('toHaveBeenCalledTimes', () => {
-        for (const i of ITERATIONS) {
-          jestExpect(fn).toHaveBeenCalledTimes(i)
-          fn(1)
-        }
-      })
-      it('toHaveBeenCalledWith', () => {
-        jestExpect(fn).not.toHaveBeenCalledWith(1)
-        fn(1)
-        jestExpect(fn).toHaveBeenCalledWith(1)
-      })
-      it('toHaveBeenLastCalledWith', () => {
-        for (const i of ITERATIONS) {
-          jestExpect(fn).not.toHaveBeenLastCalledWith(i)
-          fn(i)
-          jestExpect(fn).toHaveBeenLastCalledWith(i)
-        }
-      })
-      it('toHaveBeenNthCalledWith', () => {
-        for (const i of ITERATIONS) {
-          jestExpect(fn).not.toHaveBeenNthCalledWith(i + 1, i)
-        }
-        for (const i of ITERATIONS) {
-          fn(i)
-        }
-        for (const i of ITERATIONS) {
-          jestExpect(fn).toHaveBeenNthCalledWith(i + 1, i)
-        }
-      })
-    })
-  }
+describe('Vitest', () => {
+  it('isMockFunction', () => {})
+  const t = mlok<any>()
+  assert(typeof t === 'function' && '_isMockFunction' in t && t._isMockFunction)
+})
+
+describe('Jest', () => {
+  const isMock = (received: any) =>
+    received != null && received._isMockFunction === true
+  const isSpy = (received: any) =>
+    received != null &&
+    received.calls != null &&
+    typeof received.calls.all === 'function' &&
+    typeof received.calls.count === 'function'
+
+  it('ensureMockOrSpy', () => {})
+  const t = mlok<any>()
+  assert(isMock(t) || isSpy(t))
 })

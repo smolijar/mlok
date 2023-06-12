@@ -1,0 +1,54 @@
+name: Integration tests
+
+on: push
+
+jobs:
+  jest:
+    name: Interoperability Jest (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # All non-archived versions from https://jestjs.io/versions
+          - version: latest
+          - version: 29
+          - version: 28
+          - version: 27
+          - version: 26
+          - version: 25
+          # - version: 24
+          # - version: 23
+          # - version: 22
+    steps:
+      - uses: actions/checkout@master
+      - run: npm ci
+      - run: npm install jest@${{ matrix.version }}
+      - run: npm run build
+      - run: npm run test:jest
+  vitest:
+    name: Interoperability Vitest (${{ matrix.version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: latest
+          - version: 0.32.0
+          - version: 0.31.0
+          - version: 0.30.0
+          - version: 0.29.0
+          - version: 0.28.0
+          - version: 0.27.0
+          - version: 0.26.0
+          - version: 0.25.0
+          - version: 0.24.0
+          - version: 0.23.0
+          - version: 0.22.0
+          - version: 0.21.0
+          # - version: 0.20.0
+    steps:
+      - uses: actions/checkout@master
+      - run: npm ci
+      - run: npm install vitest@${{ matrix.version }}
+      - run: npm run test:vitest
