@@ -14,4 +14,5 @@
 - [ ] collision API
 - [ ] README
 - [ ] Sinon API / comparison
-- [ ] Jest battery test
+- [x] Jest + Vitest battery test
+- [ ] Fix test suites for Vitest<=0.20 & Jest <= 24 (probably not issue of functionality)

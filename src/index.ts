@@ -36,6 +36,10 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
     [isMlok]: true,
     // Jest
     calls,
+    // Vitest
+    _isMockFunction: true,
+    mock: { calls },
+    getMockName: () => 'MlokFn',
   }
 
   const proxy: any = new Proxy(fn, {
@@ -48,10 +52,11 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
       return children[prop]
     },
   })
-  return proxy as MlokRoot<T>
+  // _isMockFunction is used by vitest "in" check
+  return Object.assign(proxy, { _isMockFunction: true }) as MlokRoot<T>
 }
 
-type MlokLeafExtension = {
+type MlokNodeExtension = {
   [isMlok]: true
   reset: () => void
 }
@@ -64,7 +69,7 @@ type Mlok<
     : {
         [k in _MlokedInterfaceKeys]: Mlok<MlokedInterface[k], Overrides>
       }
-> = Overrides & MlokLeafExtension & ResultType
+> = Overrides & MlokNodeExtension & ResultType
 
 type MlokRoot<
   MlokedInterface,
