@@ -1,23 +1,57 @@
-class JestCalls<T extends any[] = any[]> extends Array<T> {
-  count() {
-    return this.length
+export const isMlok: unique symbol = Symbol('isMlok')
+
+type Property = string | symbol
+type Args = any[]
+enum FragmentType {
+  Property = 'Property',
+  Call = 'Call',
+}
+type Fragment =
+  | { type: FragmentType.Property; value: string | symbol }
+  | { type: FragmentType.Call; args: any[] }
+
+enum ResultType {
+  Throw = 'throw',
+  Return = 'return',
+}
+type Result =
+  | { type: ResultType.Return; value: any }
+  | { type: ResultType.Throw }
+
+class MlokatkoMap extends Map<Fragment, MlokRoot<any>> {
+  upsertProp(property: Property, value: MlokRoot<any>) {
+    return this.upsert({ type: FragmentType.Property, value: property }, value)
   }
-  all() {
-    return this.map((args) => ({ args }))
+  upsertCall(args: Args, value: MlokRoot<any>) {
+    // TODO: push args/returns
+    return this.upsert({ type: FragmentType.Call, args }, value)
+  }
+  private upsert(token: Fragment, value: MlokRoot<any>) {
+    this.set(token, this.get(token) || value)
+    return value
+  }
+  get calls() {
+    return [...this.keys()]
+      .map(token => {
+        return token.type === FragmentType.Call ? token.args : undefined
+      })
+      .filter(x => x)
+  }
+  get results(): Result[] {
+    return [...this.entries()]
+      .map(([token, child]) => {
+        return token.type === FragmentType.Call ? child : undefined
+      })
+      .filter(x => x)
+      .map(child => ({ type: ResultType.Return, value: child }))
   }
 }
 
-export const isMlok: unique symbol = Symbol('isMlok')
-
 export const mlok = <T>() => mlokNode<T>({})
 export const mlokNode = <T>(overrides: Record<any, any>) => {
-  let children: Record<string | symbol, any> = {}
-  const calls = new JestCalls()
+  let children = new MlokatkoMap()
   const fn = (...args: any[]) => {
-    const token = JSON.stringify(args)
-    calls.push(args)
-    children[token] ||= mlokNode(overrides)
-    return children[token]
+    return children.upsertCall(args, mlokNode(overrides))
   }
   Object.defineProperty(fn, 'name', {
     writable: true,
@@ -27,18 +61,18 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
   const passThrough = {
     children,
     reset: () => {
-      children = {}
-      calls.length = 0
+      children.clear()
     },
     override: (overridesMap: Record<any, any>) => {
       return mlokNode(overridesMap)
     },
     [isMlok]: true,
     // Jest
-    calls,
-    // Vitest
+    // causes isSpy to false, using the mock property instead
+    calls: { all: null },
+    // Vitest + Jest
     _isMockFunction: true,
-    mock: { calls },
+    mock: children,
     getMockName: () => 'MlokFn',
   }
 
@@ -48,8 +82,7 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
         // @ts-expect-error
         return passThrough[prop] ?? overrides[prop]
       }
-      children[prop] ||= mlokNode(overrides)
-      return children[prop]
+      return children.upsertProp(prop, mlokNode(overrides))
     },
   })
   // _isMockFunction is used by vitest "in" check
@@ -69,7 +102,7 @@ type Mlok<
     : {
         [k in _MlokedInterfaceKeys]: Mlok<MlokedInterface[k], Overrides>
       }
-> = Overrides & MlokNodeExtension & ResultType
+> = Overrides & MlokNodeExtension & ResultType & MlokedInterface
 
 type MlokRoot<
   MlokedInterface,

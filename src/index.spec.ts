@@ -1,6 +1,6 @@
 import { isMlok, mlok } from './index.js'
 import { ClientRequest } from 'node:http'
-import assert = require('assert')
+import assert from 'assert'
 
 describe('Mlok', () => {
   it('Complex chaining does not fail (both type & value)', () => {
@@ -28,9 +28,12 @@ describe('Mlok', () => {
 })
 
 describe('Vitest', () => {
-  it('isMockFunction', () => {})
-  const t = mlok<any>()
-  assert(typeof t === 'function' && '_isMockFunction' in t && t._isMockFunction)
+  it('isMockFunction', () => {
+    const t = mlok<any>()
+    assert(
+      typeof t === 'function' && '_isMockFunction' in t && t._isMockFunction
+    )
+  })
 })
 
 describe('Jest', () => {
@@ -42,7 +45,27 @@ describe('Jest', () => {
     typeof received.calls.all === 'function' &&
     typeof received.calls.count === 'function'
 
-  it('ensureMockOrSpy', () => {})
-  const t = mlok<any>()
-  assert(isMock(t) || isSpy(t))
+  it('ensureMockOrSpy', () => {
+    const t = mlok<any>()
+    assert(isMock(t) || isSpy(t))
+  })
+
+  it('isMock = true', () => {
+    const t = mlok<any>()
+    assert(isMock(t))
+  })
+
+  it('isSpy = false', () => {
+    const t = mlok<any>()
+    assert(!isSpy(t))
+  })
+
+  it('calls', () => {
+    const t = mlok<(...ns: number[]) => {}>()
+    t(1, 2, 3)
+    // @ts-expect-error
+    assert(t.mock.calls.length === 1)
+    // @ts-expect-error
+    assert.deepEqual(t.mock.calls[0], [1, 2, 3])
+  })
 })

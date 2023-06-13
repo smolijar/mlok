@@ -23,6 +23,8 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
           expect(fn).not.toHaveBeenCalled()
           fn(1)
           expect(fn).toHaveBeenCalled()
+          fn(1)
+          expect(fn).toHaveBeenCalled()
         })
         it('toHaveBeenCalledTimes', () => {
           for (const i of ITERATIONS) {
@@ -53,6 +55,20 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
             expect(fn).toHaveBeenNthCalledWith(i + 1, i)
           }
         })
+        it('toHaveReturned', () => {
+          expect(fn).not.toHaveReturned()
+          fn(1)
+          expect(fn).toHaveReturned()
+        })
+        it('toHaveReturnedTimes', () => {
+          for (const i of ITERATIONS) {
+            expect(fn).not.toHaveReturnedTimes(i)
+            fn(1)
+          }
+        })
+        it.todo('toHaveReturnedWith')
+        it.todo('toHaveLastReturnedWith')
+        it.todo('toHaveNthReturnedWith')
       })
     }
   })
