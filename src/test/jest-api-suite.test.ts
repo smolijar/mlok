@@ -1,5 +1,6 @@
 import { mlok } from '../index.js'
 import type { expect, describe, it, beforeEach } from 'vitest'
+import type { ClientRequest } from 'node:http'
 
 // Vitest types used because Jest types are unstable in older versions and would break integration tests
 type JestApi = {
@@ -10,7 +11,7 @@ type JestApi = {
 }
 
 export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
-  describe('Vitest compatibility', () => {
+  describe('Jest API compatibility', () => {
     const types = {
       function: mlok<(n: number) => {}>(),
       method: mlok<number[]>().includes,
@@ -66,9 +67,9 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
             fn(1)
           }
         })
-        it.todo('toHaveReturnedWith')
-        it.todo('toHaveLastReturnedWith')
-        it.todo('toHaveNthReturnedWith')
+        // it.todo('toHaveReturnedWith')
+        // it.todo('toHaveLastReturnedWith')
+        // it.todo('toHaveNthReturnedWith')
       })
     }
   })

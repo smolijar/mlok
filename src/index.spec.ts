@@ -1,6 +1,8 @@
 import { isMlok, mlok } from './index.js'
 import { ClientRequest } from 'node:http'
 import assert from 'assert'
+import { jestExpect } from '@jest/expect'
+import { run } from './test/jest-api-suite.test.js'
 
 describe('Mlok', () => {
   it('Complex chaining does not fail (both type & value)', () => {
@@ -76,3 +78,5 @@ describe('Jest', () => {
     assert.deepEqual(t.mock.calls[0], [1, 2, 3])
   })
 })
+
+run({ beforeEach, describe, expect: jestExpect, it } as any)
