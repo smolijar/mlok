@@ -25,6 +25,13 @@ describe('Mlok', () => {
     const foo: 'foo' = reqMock.getHeaders().authorization
     assert(foo === 'foo')
   })
+  it('Async test', async () => {
+    const asyncTest = mlok<() => Promise<string>>().override({
+      then: (x: any) => x,
+    })
+    // @ts-expect-error
+    await asyncTest()
+  })
 })
 
 describe('Vitest', () => {

@@ -67,6 +67,9 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
       return mlokNode(overridesMap)
     },
     [isMlok]: true,
+    then: (resolve: () => void) => {
+      resolve()
+    },
     // Jest
     // causes isSpy to false, using the mock property instead
     calls: { all: null },
