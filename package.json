@@ -16,7 +16,9 @@
   "author": "Jaroslav Šmolík <smolijar@gmail.com>",
   "license": "MIT",
   "files": [
-    "dist"
+    "dist",
+    "!*.spec.*",
+    "!*.test.*"
   ],
   "devDependencies": {
     "@types/mocha": "^10.0.1",
