@@ -18,40 +18,41 @@ type Result =
   | { type: ResultType.Return; value: any }
   | { type: ResultType.Throw }
 
-class MlokatkoMap extends Map<Fragment, MlokRoot<any>> {
-  upsertProp(property: Property, value: MlokRoot<any>) {
-    return this.upsert({ type: FragmentType.Property, value: property }, value)
-  }
-  upsertCall(args: Args, value: MlokRoot<any>) {
-    // TODO: push args/returns
-    return this.upsert({ type: FragmentType.Call, args }, value)
-  }
-  private upsert(token: Fragment, value: MlokRoot<any>) {
-    this.set(token, this.get(token) || value)
+class MlokatkoTree {
+  readonly #props = new Map<Property, MlokRoot<any>>()
+  readonly #calls = new Array<{ args: Args; result: Result }>()
+
+  // TODO: Rename, does not override
+  public getOrCreateProp(property: Property, createValue: MlokRoot<any>) {
+    const value = this.#props.get(property) || createValue
+    this.#props.set(property, value)
     return value
   }
-  get calls() {
-    return [...this.keys()]
-      .map(token => {
-        return token.type === FragmentType.Call ? token.args : undefined
-      })
-      .filter(x => x)
+
+  public addCall(args: Args, value: MlokRoot<any>) {
+    this.#calls.push({ args, result: { type: ResultType.Return, value } })
+    return value
   }
+
+  public clear() {
+    this.#props.clear()
+    this.#calls.length = 0
+  }
+
+  get calls() {
+    return this.#calls.map(c => c.args)
+  }
+
   get results(): Result[] {
-    return [...this.entries()]
-      .map(([token, child]) => {
-        return token.type === FragmentType.Call ? child : undefined
-      })
-      .filter(x => x)
-      .map(child => ({ type: ResultType.Return, value: child }))
+    return this.#calls.map(c => c.result)
   }
 }
 
 export const mlok = <T>() => mlokNode<T>({})
 export const mlokNode = <T>(overrides: Record<any, any>) => {
-  let children = new MlokatkoMap()
+  let tree = new MlokatkoTree()
   const fn = (...args: any[]) => {
-    return children.upsertCall(args, mlokNode(overrides))
+    return tree.addCall(args, mlokNode(overrides))
   }
   Object.defineProperty(fn, 'name', {
     writable: true,
@@ -59,9 +60,8 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
   })
 
   const passThrough = {
-    children,
     reset: () => {
-      children.clear()
+      tree.clear()
     },
     override: (overridesMap: Record<any, any>) => {
       return mlokNode(overridesMap)
@@ -75,7 +75,7 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
     calls: { all: null },
     // Vitest + Jest
     _isMockFunction: true,
-    mock: children,
+    mock: tree,
     getMockName: () => 'MlokFn',
   }
 
@@ -85,7 +85,7 @@ export const mlokNode = <T>(overrides: Record<any, any>) => {
         // @ts-expect-error
         return passThrough[prop] ?? overrides[prop]
       }
-      return children.upsertProp(prop, mlokNode(overrides))
+      return tree.getOrCreateProp(prop, mlokNode(overrides))
     },
   })
   // _isMockFunction is used by vitest "in" check
