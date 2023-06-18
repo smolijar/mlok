@@ -1,6 +1,10 @@
 import { mlok } from '../index.js'
 import type { expect, describe, it, beforeEach } from 'vitest'
-import type { ClientRequest } from 'node:http'
+import {
+  AuthenticationService,
+  ExecutionContext,
+  UserRepository,
+} from './demo-code.test.js'
 
 // Vitest types used because Jest types are unstable in older versions and would break integration tests
 type JestApi = {
@@ -72,5 +76,23 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
         // it.todo('toHaveNthReturnedWith')
       })
     }
+  })
+
+  describe('Demo', () => {
+    it('Mlok', async () => {
+      const userRepository = mlok<UserRepository>()
+      await new AuthenticationService(userRepository).authenticate(
+        mlok<ExecutionContext>()
+      )
+      expect(userRepository.getUserByToken).not.toHaveBeenCalled()
+    })
+    it('Mlok', async () => {
+      const userRepository = mlok<UserRepository>()
+      const ctx = mlok<ExecutionContext>().override({
+        authorization: 'Bearer foo',
+      })
+      await new AuthenticationService(userRepository).authenticate(ctx)
+      expect(userRepository.getUserByToken).toHaveBeenCalledWith('foo')
+    })
   })
 }
