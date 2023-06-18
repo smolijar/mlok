@@ -1,7 +1,23 @@
 {
   "name": "mlok",
   "version": "0.1.2",
-  "description": "",
+  "description": "TypeScript mocking library focused on simplicity and testing DX",
+  "license": "MIT",
+  "repository": "smolijar/mlok",
+  "keywords": [
+    "unit-testing",
+    "mock",
+    "mocking",
+    "mlok",
+    "mock-library",
+    "mockink-framework",
+    "fake",
+    "stub",
+    "double",
+    "spy",
+    "jest",
+    "vitest"
+  ],
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
