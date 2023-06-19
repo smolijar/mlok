@@ -106,12 +106,13 @@ it('Mlok', async () => {
 
 ## TODO
 
-- [ ] npm + GitHub metadata, keywords etc
+- [x] npm + GitHub metadata, keywords etc
+- [ ] docs pages?
 - [ ] Examples and DX comparison
 - [ ] function/scalar override
 - [ ] Strict override API
 - [ ] collision API
-- [ ] README
+- [x] README
 - [ ] Sinon API / comparison
 - [x] Jest + Vitest battery test
 - [ ] Fix test suites for Vitest<=0.20 & Jest <= 24 (probably not issue of functionality)

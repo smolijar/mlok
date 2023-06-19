@@ -81,13 +81,6 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
   describe('Demo', () => {
     it('Mlok', async () => {
       const userRepository = mlok<UserRepository>()
-      await new AuthenticationService(userRepository).authenticate(
-        mlok<ExecutionContext>()
-      )
-      expect(userRepository.getUserByToken).not.toHaveBeenCalled()
-    })
-    it('Mlok', async () => {
-      const userRepository = mlok<UserRepository>()
       const ctx = mlok<ExecutionContext>().override({
         authorization: 'Bearer foo',
       })

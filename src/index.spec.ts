@@ -5,34 +5,73 @@ import { jestExpect } from '@jest/expect'
 import { run } from './test/jest-api-suite.test.js'
 
 describe('Mlok', () => {
-  it('Complex chaining does not fail (both type & value)', () => {
+  it('Complex chaining does not fail', () => {
     const reqMock = mlok<ClientRequest>()
-    reqMock.getHeaderNames().at(1)?.toUpperCase().padEnd(20)[3].charAt(1)
+    reqMock
+      .getHeaderNames()
+      .filter(x => x)
+      .at(1)
+      ?.toLocaleLowerCase()
+      .padEnd(20)[3]
+      .charAt(1)
   })
-  it('Mlok object in hierarchy (both type & value)', () => {
-    const reqMock = mlok<ClientRequest>()
-    assert(reqMock[isMlok])
-    assert(reqMock.getMaxListeners()[isMlok])
-    assert(reqMock.getRawHeaderNames().at(1).length[isMlok])
+  describe('Mlok object API in the hierarchy', () => {
+    const req = mlok<ClientRequest>()
+    for (const [name, mlokNode] of Object.entries({
+      'Top level interface': req,
+      Method: req.getMaxListeners,
+      'Method call': req.getMaxListeners(),
+      Array: req.getHeaders(),
+      'Array index access': req.getHeaders()[1],
+      'Number (Array length)': req.getHeaders().length,
+      'Top level function': mlok<() => {}>(),
+      'Top level function call': mlok<() => {}>()(),
+    })) {
+      it(`${name} - ${isMlok.toString()} true`, () => {
+        assert(mlokNode[isMlok])
+      })
+    }
   })
-  it('Override (simple object)', () => {
-    const reqMock = mlok<ClientRequest>().override({ authorization: 'foo' })
-    assert(reqMock.getHeaders().authorization === 'foo')
-  })
-  it('Override (simple object, type override)', () => {
-    const reqMock = mlok<ClientRequest>().override({
-      authorization: 'foo',
-    } as const)
-    assert(reqMock.getHeaders().authorization === 'foo')
-    const foo: 'foo' = reqMock.getHeaders().authorization
-    assert(foo === 'foo')
-  })
-  it('Async test', async () => {
-    const asyncTest = mlok<() => Promise<string>>().override({
-      then: (x: any) => x,
+  describe('.override', () => {
+    it('nested property', () => {
+      const reqMock = mlok<ClientRequest>().override({
+        authorization: 'foo',
+      } as const)
+      const foo: 'foo' = reqMock.getHeaders().authorization
+      assert(foo === 'foo')
     })
-    // @ts-expect-error
-    await asyncTest()
+
+    it('overrides all occurrences', () => {
+      const length42Array = mlok<any[]>().override({
+        length: 42,
+      } as const)
+      for (const x of [length42Array.length, length42Array.sort().length]) {
+        const l: 42 = x
+        assert(l === 42)
+      }
+    })
+
+    it('is immutable (override creates a new instance)', () => {
+      const reqMock = mlok<ClientRequest>()
+      const reqMockOverridden = reqMock.override({
+        authorization: 'foo',
+      } as const)
+      // @ts-expect-error is string | number | string[]
+      const foo: string = reqMock.getHeaders().authorization
+      assert(foo !== 'foo')
+
+      const foo2: 'foo' = reqMockOverridden.getHeaders().authorization
+      assert(foo2 === 'foo')
+    })
+  })
+  describe('Is awaitable', () => {
+    const asyncTest = mlok<{ test: () => Promise<string> }>()
+    it('interface', async () => {
+      await asyncTest
+    })
+    it('method call', async () => {
+      await asyncTest.test()
+    })
   })
 })
 
