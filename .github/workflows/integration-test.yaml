@@ -23,8 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - run: npm ci
-      - run: npm install jest@${{ matrix.version }}
       - run: npm run build
+      - run: npm install jest@${{ matrix.version }}
       - run: npm run test:jest
   vitest:
     name: Interoperability Vitest (${{ matrix.version }})
