@@ -1,36 +1,87 @@
 import { isMlok, mlok } from './index.js'
 import { ClientRequest } from 'node:http'
-import assert = require('assert')
+import assert from 'assert'
+import { jestExpect } from '@jest/expect'
+import { run } from './test/jest-api-suite.test.js'
 
 describe('Mlok', () => {
-  it('Complex chaining does not fail (both type & value)', () => {
+  it('Complex chaining does not fail', () => {
     const reqMock = mlok<ClientRequest>()
-    reqMock.getHeaderNames().at(1)?.toUpperCase().padEnd(20)[3].charAt(1)
+    reqMock
+      .getHeaderNames()
+      .filter(x => x)
+      .at(1)
+      ?.toLocaleLowerCase()
+      .padEnd(20)[3]
+      .charAt(1)
   })
-  it('Mlok object in hierarchy (both type & value)', () => {
-    const reqMock = mlok<ClientRequest>()
-    assert(reqMock[isMlok])
-    assert(reqMock.getMaxListeners()[isMlok])
-    assert(reqMock.getRawHeaderNames().at(1).length[isMlok])
+  describe('Mlok object API in the hierarchy', () => {
+    const req = mlok<ClientRequest>()
+    for (const [name, mlokNode] of Object.entries({
+      'Top level interface': req,
+      Method: req.getMaxListeners,
+      'Method call': req.getMaxListeners(),
+      Array: req.getHeaders(),
+      'Array index access': req.getHeaders()[1],
+      'Number (Array length)': req.getHeaders().length,
+      'Top level function': mlok<() => {}>(),
+      'Top level function call': mlok<() => {}>()(),
+    })) {
+      it(`${name} - ${isMlok.toString()} true`, () => {
+        assert(mlokNode[isMlok])
+      })
+    }
   })
-  it('Override (simple object)', () => {
-    const reqMock = mlok<ClientRequest>().override({ authorization: 'foo' })
-    assert(reqMock.getHeaders().authorization === 'foo')
+  describe('.override', () => {
+    it('nested property', () => {
+      const reqMock = mlok<ClientRequest>().override({
+        authorization: 'foo',
+      } as const)
+      const foo: 'foo' = reqMock.getHeaders().authorization
+      assert(foo === 'foo')
+    })
+
+    it('overrides all occurrences', () => {
+      const length42Array = mlok<any[]>().override({
+        length: 42,
+      } as const)
+      for (const x of [length42Array.length, length42Array.sort().length]) {
+        const l: 42 = x
+        assert(l === 42)
+      }
+    })
+
+    it('is immutable (override creates a new instance)', () => {
+      const reqMock = mlok<ClientRequest>()
+      const reqMockOverridden = reqMock.override({
+        authorization: 'foo',
+      } as const)
+      // @ts-expect-error is string | number | string[]
+      const foo: string = reqMock.getHeaders().authorization
+      assert(foo !== 'foo')
+
+      const foo2: 'foo' = reqMockOverridden.getHeaders().authorization
+      assert(foo2 === 'foo')
+    })
   })
-  it('Override (simple object, type override)', () => {
-    const reqMock = mlok<ClientRequest>().override({
-      authorization: 'foo',
-    } as const)
-    assert(reqMock.getHeaders().authorization === 'foo')
-    const foo: 'foo' = reqMock.getHeaders().authorization
-    assert(foo === 'foo')
+  describe('Is awaitable', () => {
+    const asyncTest = mlok<{ test: () => Promise<string> }>()
+    it('interface', async () => {
+      await asyncTest
+    })
+    it('method call', async () => {
+      await asyncTest.test()
+    })
   })
 })
 
 describe('Vitest', () => {
-  it('isMockFunction', () => {})
-  const t = mlok<any>()
-  assert(typeof t === 'function' && '_isMockFunction' in t && t._isMockFunction)
+  it('isMockFunction', () => {
+    const t = mlok<any>()
+    assert(
+      typeof t === 'function' && '_isMockFunction' in t && t._isMockFunction
+    )
+  })
 })
 
 describe('Jest', () => {
@@ -42,7 +93,29 @@ describe('Jest', () => {
     typeof received.calls.all === 'function' &&
     typeof received.calls.count === 'function'
 
-  it('ensureMockOrSpy', () => {})
-  const t = mlok<any>()
-  assert(isMock(t) || isSpy(t))
+  it('ensureMockOrSpy', () => {
+    const t = mlok<any>()
+    assert(isMock(t) || isSpy(t))
+  })
+
+  it('isMock = true', () => {
+    const t = mlok<any>()
+    assert(isMock(t))
+  })
+
+  it('isSpy = false', () => {
+    const t = mlok<any>()
+    assert(!isSpy(t))
+  })
+
+  it('calls', () => {
+    const t = mlok<(...ns: number[]) => {}>()
+    t(1, 2, 3)
+    // @ts-expect-error
+    assert(t.mock.calls.length === 1)
+    // @ts-expect-error
+    assert.deepEqual(t.mock.calls[0], [1, 2, 3])
+  })
 })
+
+run({ beforeEach, describe, expect: jestExpect, it } as any)

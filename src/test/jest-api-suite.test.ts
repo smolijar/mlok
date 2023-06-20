@@ -1,5 +1,10 @@
 import { mlok } from '../index.js'
 import type { expect, describe, it, beforeEach } from 'vitest'
+import {
+  AuthenticationService,
+  ExecutionContext,
+  UserRepository,
+} from './demo-code.test.js'
 
 // Vitest types used because Jest types are unstable in older versions and would break integration tests
 type JestApi = {
@@ -10,7 +15,7 @@ type JestApi = {
 }
 
 export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
-  describe('Vitest compatibility', () => {
+  describe('Jest API compatibility', () => {
     const types = {
       function: mlok<(n: number) => {}>(),
       method: mlok<number[]>().includes,
@@ -21,6 +26,8 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
       describe(label, () => {
         it('toHaveBeenCalled', () => {
           expect(fn).not.toHaveBeenCalled()
+          fn(1)
+          expect(fn).toHaveBeenCalled()
           fn(1)
           expect(fn).toHaveBeenCalled()
         })
@@ -53,7 +60,32 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
             expect(fn).toHaveBeenNthCalledWith(i + 1, i)
           }
         })
+        it('toHaveReturned', () => {
+          expect(fn).not.toHaveReturned()
+          fn(1)
+          expect(fn).toHaveReturned()
+        })
+        it('toHaveReturnedTimes', () => {
+          for (const i of ITERATIONS) {
+            expect(fn).not.toHaveReturnedTimes(i)
+            fn(1)
+          }
+        })
+        // it.todo('toHaveReturnedWith')
+        // it.todo('toHaveLastReturnedWith')
+        // it.todo('toHaveNthReturnedWith')
       })
     }
+  })
+
+  describe('Demo', () => {
+    it('Mlok', async () => {
+      const userRepository = mlok<UserRepository>()
+      const ctx = mlok<ExecutionContext>().override({
+        authorization: 'Bearer foo',
+      })
+      await new AuthenticationService(userRepository).authenticate(ctx)
+      expect(userRepository.getUserByToken).toHaveBeenCalledWith('foo')
+    })
   })
 }
