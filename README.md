@@ -109,7 +109,8 @@ it('Mlok', async () => {
 - [x] npm + GitHub metadata, keywords etc
 - [ ] docs pages?
 - [ ] Examples and DX comparison
-- [ ] function/scalar override
+- [x] function override
+- [ ] scalar override
 - [ ] Strict override API
 - [ ] collision API
 - [x] README

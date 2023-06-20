@@ -17,8 +17,9 @@ type JestApi = {
 export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
   describe('Jest API compatibility', () => {
     const types = {
-      function: mlok<(n: number) => {}>(),
-      method: mlok<number[]>().includes,
+      function: mlok<(n: number) => {}>().override((n: number) => n ** 2),
+      method: mlok<number[]>().override({ includes: (n: number) => n ** 2 })
+        .includes,
     }
     for (const [label, fn] of Object.entries(types)) {
       const ITERATIONS = Array(10).keys()
@@ -71,9 +72,29 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
             fn(1)
           }
         })
-        // it.todo('toHaveReturnedWith')
-        // it.todo('toHaveLastReturnedWith')
-        // it.todo('toHaveNthReturnedWith')
+        it('toHaveReturnedWith', () => {
+          expect(fn).not.toHaveReturnedWith(1)
+          fn(1)
+          expect(fn).toHaveReturnedWith(1)
+        })
+        it('toHaveLastReturnedWith', () => {
+          for (const i of ITERATIONS) {
+            expect(fn).not.toHaveLastReturnedWith(i)
+            fn(i)
+            expect(fn).toHaveLastReturnedWith(i * i)
+          }
+        })
+        it('toHaveNthReturnedWith', () => {
+          for (const i of ITERATIONS) {
+            expect(fn).not.toHaveNthReturnedWith(i + 1, i)
+          }
+          for (const i of ITERATIONS) {
+            fn(i)
+          }
+          for (const i of ITERATIONS) {
+            expect(fn).toHaveNthReturnedWith(i + 1, i * i)
+          }
+        })
       })
     }
   })

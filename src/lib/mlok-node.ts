@@ -3,12 +3,19 @@ import { MlokatkoTree } from './mlokatko-map.js'
 
 export const isMlok: unique symbol = Symbol('isMlok')
 
-export type Override = Record<any, any>
+export type Override = ((...args: any[]) => any) | Record<any, any>
+
+const isFn = (x: any): x is (...args: any[]) => any => {
+  return typeof x === 'function'
+}
 
 export const mlokNode = <T>(overrides: Override) => {
   const tree = new MlokatkoTree<MlokRoot<any>>()
   const fn = createMlokFn((...args: any[]) => {
-    return tree.addCall(args, mlokNode(overrides))
+    return tree.addCall(
+      args,
+      isFn(overrides) ? overrides(...args) : mlokNode(overrides)
+    )
   })
 
   const mlokApiObject = {
@@ -34,8 +41,18 @@ export const mlokNode = <T>(overrides: Override) => {
   const proxy: any = new Proxy(fn, {
     get: (_target, prop) => {
       // @ts-expect-error
-      const value = mlokApiObject[prop] ?? overrides[prop]
-      return value ?? tree.getOrCreateProp(prop, mlokNode(overrides))
+      const overriddenProp = overrides[prop]
+      // @ts-expect-error
+      const mlokApiProp = mlokApiObject[prop]
+      const immediateReturnValue =
+        mlokApiProp ?? (!isFn(overriddenProp) ? overriddenProp : null)
+      return (
+        immediateReturnValue ??
+        tree.getOrCreateProp(
+          prop,
+          isFn(overriddenProp) ? mlokNode(overriddenProp) : mlokNode(overrides)
+        )
+      )
     },
   })
   // _isMockFunction is used by vitest "in" check

@@ -63,6 +63,20 @@ describe('Mlok', () => {
       const foo2: 'foo' = reqMockOverridden.getHeaders().authorization
       assert(foo2 === 'foo')
     })
+
+    it('overriding return (direct)', () => {
+      const fnMock = mlok<() => string>().override(() => 'foo' as const)
+      const foo: 'foo' = fnMock()
+      assert(foo === 'foo')
+    })
+
+    it('overriding return (method)', () => {
+      const reqMock = mlok<ClientRequest>().override({
+        getHeaders: () => 'foo',
+      } as const)
+      const foo: 'foo' = reqMock.getHeaders()
+      assert(foo === 'foo')
+    })
   })
   describe('Is awaitable', () => {
     const asyncTest = mlok<{ test: () => Promise<string> }>()
