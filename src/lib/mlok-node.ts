@@ -3,13 +3,23 @@ import { MlokatkoTree } from './mlokatko-map.js'
 
 export const isMlok: unique symbol = Symbol('isMlok')
 
-export type Override = ((...args: any[]) => any) | Record<any, any>
+type Primitive = string | number | boolean | symbol | bigint
+export type AllowedOverride =
+  | ((...args: any[]) => any)
+  | Record<any, any>
+  | Primitive
 
 const isFn = (x: any): x is (...args: any[]) => any => {
   return typeof x === 'function'
 }
 
-export const mlokNode = <T>(overrides: Override) => {
+const isPrimitive = (x: any): x is Primitive => {
+  return typeof x !== 'object' && !isFn(x)
+}
+export const mlokNode = <T>(overrides: AllowedOverride) => {
+  if (isPrimitive(overrides)) {
+    return overrides
+  }
   const tree = new MlokatkoTree<MlokRoot<any>>()
   const fn = createMlokFn((...args: any[]) => {
     return tree.addCall(
@@ -22,7 +32,7 @@ export const mlokNode = <T>(overrides: Override) => {
     reset: () => {
       tree.clear()
     },
-    override: (overridesMap: Override) => {
+    override: (overridesMap: AllowedOverride) => {
       return mlokNode(overridesMap)
     },
     [isMlok]: true,
@@ -56,7 +66,9 @@ export const mlokNode = <T>(overrides: Override) => {
     },
   })
   // _isMockFunction is used by vitest "in" check
-  return Object.assign(proxy, { _isMockFunction: true }) as MlokRoot<T>
+  return Object.assign(proxy, {
+    _isMockFunction: true,
+  }) as MlokRoot<T>
 }
 
 type MlokNodeExtension = {
@@ -66,20 +78,22 @@ type MlokNodeExtension = {
 
 type Mlok<
   MlokedInterface,
-  Overrides extends Override = {},
+  Override extends AllowedOverride = {},
   _MlokedInterfaceKeys extends keyof MlokedInterface = keyof MlokedInterface,
-  ResultType = MlokedInterface extends (...args: infer A) => infer R
-    ? (...args: A) => Mlok<Exclude<R, undefined>, Overrides>
+  MlokResultType = MlokedInterface extends (...args: infer A) => infer R
+    ? (...args: A) => Mlok<Exclude<R, undefined>, Override>
     : {
-        [k in _MlokedInterfaceKeys]: Mlok<MlokedInterface[k], Overrides>
+        [k in _MlokedInterfaceKeys]: Mlok<MlokedInterface[k], Override>
       }
-> = Overrides & MlokNodeExtension & ResultType & MlokedInterface
+> = Override extends Function | object
+  ? Override & MlokNodeExtension & MlokResultType & MlokedInterface
+  : Override
 
 export type MlokRoot<
   MlokedInterface,
   ResultType = Mlok<MlokedInterface>
 > = ResultType & {
-  override: <O extends Record<any, any>>(
+  override: <O extends AllowedOverride>(
     overridesMap: O
   ) => Mlok<MlokedInterface, O>
 }

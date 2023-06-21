@@ -110,7 +110,7 @@ it('Mlok', async () => {
 - [ ] docs pages?
 - [ ] Examples and DX comparison
 - [x] function override
-- [ ] scalar override
+- [x] scalar override
 - [ ] Strict override API
 - [ ] collision API
 - [x] README

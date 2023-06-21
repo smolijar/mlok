@@ -77,6 +77,12 @@ describe('Mlok', () => {
       const foo: 'foo' = reqMock.getHeaders()
       assert(foo === 'foo')
     })
+
+    it('overriding scalar (direct)', () => {
+      let scalarOverride = mlok<string>().override('bar' as const)
+      const bar: 'bar' = scalarOverride
+      assert(bar == 'bar')
+    })
   })
   describe('Is awaitable', () => {
     const asyncTest = mlok<{ test: () => Promise<string> }>()
