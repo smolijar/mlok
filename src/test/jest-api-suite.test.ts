@@ -1,4 +1,4 @@
-import { mlok } from '../index.js'
+import mlok from '../index.js'
 import type { expect, describe, it, beforeEach } from 'vitest'
 import {
   AuthenticationService,

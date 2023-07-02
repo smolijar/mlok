@@ -1,4 +1,4 @@
-import { isMlok, mlok } from './index.js'
+import mlok, { isMlok } from './index.js'
 import { ClientRequest } from 'node:http'
 import assert from 'assert'
 import { jestExpect } from '@jest/expect'
