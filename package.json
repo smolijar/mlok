@@ -1,6 +1,6 @@
 {
   "name": "mlok",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "TypeScript mocking library focused on simplicity and testing DX",
   "license": "MIT",
   "repository": "smolijar/mlok",
@@ -19,6 +19,7 @@
     "vitest"
   ],
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
