@@ -1,0 +1,23 @@
+name: Publish Pages
+
+on: push
+permissions:
+  contents: write
+jobs:
+  build-and-deploy:
+    name: Build & deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install and Build
+        run: |
+          cd docs
+          npm ci
+          npm run build
+      - uses: JamesIves/github-pages-deploy-action@4.1.0
+        with:
+          branch: gh-pages
+          folder: docs/build
+          clean: true
+          token: ${{ secrets.GITHUB_TOKEN }}

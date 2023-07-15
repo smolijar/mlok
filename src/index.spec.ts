@@ -84,13 +84,19 @@ describe('Mlok', () => {
       assert(bar == 'bar')
     })
   })
-  describe('Is awaitable', () => {
+  describe('Thenable', () => {
     const asyncTest = mlok<{ test: () => Promise<string> }>()
-    it('interface', async () => {
+    it('interface await does not timeout', async () => {
       await asyncTest
     })
-    it('method call', async () => {
+    it('method call await does not timeout', async () => {
       await asyncTest.test()
+    })
+    it('await chainable', async () => {
+      ;(await asyncTest.test()).at(1)
+    })
+    it('then chainable', async () => {
+      await asyncTest.test().then(x => x.at(1))
     })
   })
 })
