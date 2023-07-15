@@ -1,41 +1,34 @@
-import React from 'react';
-import clsx from 'clsx';
-import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
-import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
+import React from 'react'
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
+import Layout from '@theme/Layout'
+import Link from '@docusaurus/Link'
 
-import styles from './index.module.css';
-
-function HomepageHeader() {
-  const {siteConfig} = useDocusaurusContext();
+function HomeContent() {
   return (
-    <header className={clsx('hero hero--primary', styles.heroBanner)}>
-      <div className="container">
-        <h1 className="hero__title">{siteConfig.title}</h1>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
-        <div className={styles.buttons}>
-          <Link
-            className="button button--secondary button--lg"
-            to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
-          </Link>
-        </div>
+    <div className="hero-content">
+      <div className="bubble">
+        <img src="img/logo.png" />
+        <h1>
+          <span className="fn">mlok</span>
+          <span className="br">&lt;</span>
+          <span className="type">T</span>
+          <span className="br">&gt;</span>
+          <span className="br">()</span>
+        </h1>
+        <h2>create mocks like this 🫰</h2>
+        <Link className="button button--primary" to="/docs/intro">
+          Learn more
+        </Link>
+        <br />
       </div>
-    </header>
-  );
+    </div>
+  )
 }
-
 export default function Home(): JSX.Element {
-  const {siteConfig} = useDocusaurusContext();
+  const { siteConfig } = useDocusaurusContext()
   return (
-    <Layout
-      title={`Hello from ${siteConfig.title}`}
-      description="Description will go into a meta tag in <head />">
-      <HomepageHeader />
-      <main>
-        <HomepageFeatures />
-      </main>
+    <Layout title={siteConfig.title} description={siteConfig.tagline}>
+      <HomeContent />
     </Layout>
-  );
+  )
 }

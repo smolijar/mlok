@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/cascadia-code');
 /**
  * Any CSS included here will be global. The classic template
  * bundles Infima by default. Infima is a CSS framework designed to
@@ -6,25 +7,125 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #ed2762;
+  --ifm-color-primary-dark: #ed2762;
+  --ifm-color-primary-darker: #ed2762;
+  --ifm-color-primary-darkest: #ed2762;
+  --ifm-color-primary-light: #ed2762;
+  --ifm-color-primary-lighter: #ed2762;
+  --ifm-color-primary-lightest: #ed2762;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+.hero-content {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(90deg, #e52e71, #ff8a00);
+  color: white;
+}
+@media screen and (max-width: 600px) {
+  .hero-content .bubble {
+    width: 300px;
+    margin-left: -150px;
+  }
+  .hero-content .bubble h1 {
+    font-size: 3em;
+  }
+  .hero-content .bubble h2 {
+    font-size: 1em;
+  }
+}
+@media screen and (min-width: 601px) {
+  .hero-content .bubble {
+    width: 600px;
+    margin-left: -300px;
+  }
+}
+
+.hero-content .bubble {
+  position: absolute;
+  content: '';
+  left: 50%;
+  top: 20%;
+  /* width: 600px; */
+  height: 450px;
+  background: #17141d;
+  background: linear-gradient(90deg, #17141d, #373232);
+  border-radius: 62% 47% 82% 35% / 45% 45% 80% 66%;
+  will-change: border-radius, transform, opacity;
+  animation: sliderShape 13s linear infinite;
+  display: block;
+  -webkit-animation: sliderShape 13s linear infinite;
+  z-index: 0;
+  /* margin-left: -300px; */
+  text-align: center;
+}
+@keyframes sliderShape {
+  0%,
+  100% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    transform: translate3d(0, 0, 0) rotateZ(0.01deg);
+  }
+  34% {
+    border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%;
+    transform: translate3d(0, 5px, 0) rotateZ(0.01deg);
+  }
+  50% {
+    transform: translate3d(0, 0, 0) rotateZ(0.01deg);
+  }
+  67% {
+    border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
+    transform: translate3d(0, -3px, 0) rotateZ(0.01deg);
+  }
+}
+
+.hero-content div {
+  margin: auto;
+}
+
+.hero-content code {
+  text-align: left;
+  background-color: transparent;
+}
+
+.hero-content h1 {
+  font-family: 'Cascadia Code', sans-serif;
+  font-size: 5em;
+  text-align: center;
+  /* margin-top: 280px; */
+  position: relative;
+}
+
+.hero-content img {
+  height: 100px;
+  position: relative;
+  margin-top: 70px;
+}
+
+.hero-content .fn {
+  color: #ed2762;
+}
+
+.hero-content .type {
+  color: #6fd1db;
+}
+.hero-content h1 .br {
+  color: #808080;
+}
+
+.hero-content h2 {
+  font-family: 'Cascadia Code', sans-serif;
+  text-align: center;
+
+  position: relative;
+}
+
+.boxes-container {
+  display: grid;
+  grid-gap: 20px;
+  grid-template-columns: 50% 50%;
+}
+.boxes-container .box {
+  background-color: black;
 }

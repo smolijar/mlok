@@ -2,46 +2,34 @@
 sidebar_position: 1
 ---
 
-# Tutorial Intro
+# Intro
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Mlok creates spy-able interfaces with a single call (full Jest/Vitest compatible):
 
-## Getting Started
-
-Get started by **creating a new site**.
-
-Or **try Docusaurus immediately** with **[docusaurus.new](https://docusaurus.new)**.
-
-### What you'll need
-
-- [Node.js](https://nodejs.org/en/download/) version 16.14 or above:
-  - When installing Node.js, you are recommended to check all checkboxes related to dependencies.
-
-## Generate a new site
-
-Generate a new Docusaurus site using the **classic template**.
-
-The classic template will automatically be added to your project after you run the command:
-
-```bash
-npm init docusaurus@latest my-website classic
+```ts
+const mockedRepository = mlok<CatRepository>()
+mockedRepository.listStrayCats()
+// Jest / Vitest
+expect(userRepository.listStrayCats).toHaveBeenCalled()
 ```
 
-You can type this command into Command Prompt, Powershell, Terminal, or any other integrated terminal of your code editor.
+With simple and powerful type-safe override API:
 
-The command also installs all necessary dependencies you need to run Docusaurus.
-
-## Start your site
-
-Run the development server:
-
-```bash
-cd my-website
-npm run start
+```ts
+mlok<any[]>().override({ length: 42 } as const)
+assert(length42Array.sort().length === 42)
+//                            ^? actually type 42!
 ```
 
-The `cd` command changes the directory you're working with. In order to work with your newly created Docusaurus site, you'll need to navigate the terminal there.
+And impressive dynamic:
 
-The `npm run start` command builds your website locally and serves it through a development server, ready for you to view at http://localhost:3000/.
+```ts
+const containerFullOfMeows = mlok<MyServiceContainer>().override({
+  name: 'Meow',
+})
 
-Open `docs/intro.md` (this page) and edit some lines: the site **reloads automatically** and displays your changes.
+// FLuently access whatever your interface provides:
+const cat = await containerFullOfMeows['catRepository'].getCatById(42)
+const bestFriend = (await cat.findFriends()).find(c => c.isBest)
+assert(bestFriend.name === 'Meow')
+```
