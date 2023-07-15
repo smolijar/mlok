@@ -1,5 +1,6 @@
 import { createMlokFn } from './mlok-fn.js'
 import { MlokatkoTree } from './mlokatko-map.js'
+import { makeThenableProxy } from './thenable-proxy.js'
 
 export const isMlok: unique symbol = Symbol('isMlok')
 
@@ -36,10 +37,6 @@ export const mlokNode = <T>(overrides: AllowedOverride) => {
       return mlokNode(overridesMap)
     },
     [isMlok]: true,
-    // Awaitable
-    then: (resolve: () => void) => {
-      resolve()
-    },
     // Jest: causes isSpy to false, using the nested prop, e.g. `mock.calls` instead of `calls` directly
     calls: { all: null },
     // Vitest + Jest
@@ -66,9 +63,11 @@ export const mlokNode = <T>(overrides: AllowedOverride) => {
     },
   })
   // _isMockFunction is used by vitest "in" check
-  return Object.assign(proxy, {
-    _isMockFunction: true,
-  }) as MlokRoot<T>
+  return makeThenableProxy(
+    Object.assign(proxy, {
+      _isMockFunction: true,
+    }) as MlokRoot<T>
+  )
 }
 
 type MlokNodeExtension = {
