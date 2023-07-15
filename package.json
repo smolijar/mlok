@@ -31,13 +31,13 @@
     "test:jest": "NODE_OPTIONS=--experimental-vm-modules npx jest dist/test/jest.test.js"
   },
   "author": "Jaroslav Šmolík <smolijar@gmail.com>",
-  "license": "MIT",
   "files": [
     "dist",
     "!*.spec.*",
     "!*.test.*"
   ],
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/mocha": "^10.0.1",
     "jest": "^29.5.0",
     "mocha": "^10.2.0",

@@ -1,5 +1,6 @@
 import mlok from '../index.js'
 import type { expect, describe, it, beforeEach } from 'vitest'
+import Express from 'express'
 import {
   AuthenticationService,
   ExecutionContext,
@@ -107,6 +108,35 @@ export const run = ({ expect, describe, it, beforeEach }: JestApi) => {
       })
       await new AuthenticationService(userRepository).authenticate(ctx)
       expect(userRepository.getUserByToken).toHaveBeenCalledWith('foo')
+    })
+    it('CatRepository', async () => {
+      type MyServiceContainer = {
+        catRepository: {
+          getCatById(id: number): {
+            findFriends(): { name: string; isBest: boolean }[]
+          }
+        }
+      }
+      const OVERRIDES = { name: 'Meow' } as const
+      const containerFullOfMeows =
+        mlok<MyServiceContainer>().override(OVERRIDES)
+
+      const cat = await containerFullOfMeows['catRepository'].getCatById(42)
+      const bestFriend = (await cat.findFriends()).find(c => c.isBest)
+      const name: 'Meow' = bestFriend.name
+      expect(name === 'Meow')
+    })
+    it('Express', async () => {
+      const app = mlok<Express.Application>()
+      const port = 1234
+      app.get('/', (req, res) => {
+        res.send('Hello World!')
+      })
+
+      app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`)
+      })
+      expect(app.listen).toHaveBeenCalledWith(1234, expect.any(Function))
     })
   })
 }
